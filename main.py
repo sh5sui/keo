@@ -81,8 +81,20 @@ async def commands(interaction: discord.Interaction):
     embed.add_field(name="ticket", value="Opens a ticket with reason", inline=False)
     embed.add_field(name="close", value="Closes an open ticket with reason", inline=False)
     embed.add_field(name="setup", value="Automatically sets your server up to be in full compatability with keo", inline=False)
+    embed.add_field(name="ping", value="Pings keo to see the latency")
+    embed.add_field(name="avatar", value="Gets a users avatar")
 
     await interaction.response.send_message(embed=embed)
+
+@bot.tree.command(name="ping", description="Pings the bot to see latency")
+async def ping(interaction: discord.Interaction):
+
+    interaction.response.send_message(f"Latency: {bot.latency}")
+
+@bot.tree.command(name="avatar", description="Get a users avatar")
+async def avatar(interaction: discord.Interaction, target: discord.User = None):
+
+    interaction.response.send_message(target.avatar.url)
 
 @bot.tree.command(name="close", description="Closes an open ticket")
 async def close(interaction: discord.Interaction, reason: str = None):
