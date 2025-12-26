@@ -150,8 +150,6 @@ async def setup(interaction: discord.Interaction):
 
     await interaction.response.send_message(embed=setupstart)
 
-    await interaction.response.send_message("Starting setup")
-
     ticketsetup = await interaction.guild.create_category(
         name="tickets",
         overwrites=ticketspermissions
@@ -162,7 +160,7 @@ async def setup(interaction: discord.Interaction):
         overwrites=logpermissions
     )
 
-    await interaction.response.send_message("Setup completed")
+    interaction.followup.send(f"Setup finished, Created tickets category, created keo logs channel {logsetup.mention}")
 
 Token = os.getenv("Token")
 bot.run(Token)
