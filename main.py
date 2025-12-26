@@ -94,6 +94,26 @@ async def ticket(interaction: discord.Interaction, reason: str = None):
 
     await keologs.send(embed=logsembed)
 
+@bot.tree.command(name="add", description="Adds a member to a ticket")
+async def add(interaction: discord.Interaction, member: discord.Member = None):
+
+    if interaction.channel.category.name != "tickets":
+        await interaction.response.send_message("You cannot use this command outside of the tickets category")
+        return
+    
+    if not(interaction.user.guild_permissions.manage_channels):
+        await interaction.response.send_message("You don't have permission to run this command")
+        return
+    
+    await interaction.channel.set_permissions(
+        member,
+        view_channel=True,
+        send_messages=True,
+        read_message_history=True
+    )
+
+    await interaction.response.send_message(f"{member.mention}, Has been added to the ticket")
+
 @bot.tree.command(name="commands", description="Shows a list of all available commands")
 async def commands(interaction: discord.Interaction):
 
