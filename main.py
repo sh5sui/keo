@@ -3,7 +3,6 @@ from discord.ext import commands
 import aiohttp
 import asyncio
 from discord import app_commands
-from discord import guild
 from dotenv import load_dotenv
 import os
 import sqlite3
@@ -61,6 +60,10 @@ async def ticket(interaction: discord.Interaction, reason: str = None):
 
     guild = interaction.guild
 
+    logs = discord.utils.get(guild.text_channels, name="keo-logs")
+
+    keologs = logs
+
     permissions = {
     guild.default_role: discord.PermissionOverwrite(view_channel=False),
     interaction.user: discord.PermissionOverwrite(view_channel=True, send_messages=True)
@@ -84,6 +87,12 @@ async def ticket(interaction: discord.Interaction, reason: str = None):
     )
 
     await interaction.response.send_message(f"Your ticket has been created, {ticket.mention}", ephemeral=True)
+
+    logsembed=discord.Embed(title="Ticket opened", color=discord.Color.blue())
+    logsembed.set_thumbnail(url="https://cdn.discordapp.com/attachments/1365048856706023517/1454186679060660387/d1631a367e7b13cb22c78a416a5ad5be.jpg?ex=69502c61&is=694edae1&hm=4e908a9198ed0cd6477ceffa54ebabbf08f579b767d37ea516b126092ac3ecec&")
+    logsembed.add_field(name="", value=f"Ticket created by {interaction.user.mention}")
+
+    await keologs.send(embed=logsembed)
 
 @bot.tree.command(name="commands", description="Shows a list of all available commands")
 async def commands(interaction: discord.Interaction):
@@ -115,6 +124,10 @@ async def close(interaction: discord.Interaction, reason: str = None):
 
     guild = interaction.guild
 
+    logs = discord.utils.get(guild.text_channels, name="keo-logs")
+
+    keologs = logs
+
     if not (interaction.user.guild_permissions.manage_channels):
         await interaction.response.send_message("You do not have permission to run this command", ephemeral=True)
         return
@@ -129,6 +142,12 @@ async def close(interaction: discord.Interaction, reason: str = None):
     
     await interaction.channel.delete()
 
+    logsembed=discord.Embed(title="Ticket closed", color=discord.Color.blue())
+    logsembed.set_thumbnail(url="https://cdn.discordapp.com/attachments/1365048856706023517/1454186679060660387/d1631a367e7b13cb22c78a416a5ad5be.jpg?ex=69502c61&is=694edae1&hm=4e908a9198ed0cd6477ceffa54ebabbf08f579b767d37ea516b126092ac3ecec&")
+    logsembed.add_field(name="", value=f"Ticket closed by {interaction.user.mention}")
+
+    await keologs.send(embed=logsembed)
+
 @bot.tree.command(name="setup", description="Runs you through a setup to ensure that keo runs as intended in your server")
 async def setup(interaction: discord.Interaction):
 
@@ -139,6 +158,12 @@ async def setup(interaction: discord.Interaction):
     logpermissions = {
         interaction.guild.default_role: discord.PermissionOverwrite(view_channel=False)
     }
+
+    guild = interaction.guild
+
+    logs = discord.utils.get(guild.text_channels, name="keo-logs")
+
+    keologs = logs
 
     if not (interaction.user.guild_permissions.administrator):
         await interaction.response.send_message("You don't have permission to run this command. Missing permssion: Administrator")
@@ -161,6 +186,12 @@ async def setup(interaction: discord.Interaction):
     )
 
     interaction.followup.send(f"Setup finished, Created tickets category, created keo logs channel {logsetup.mention}")
+
+    logsembed=discord.Embed(title="Command executed", color=discord.Color.blue())
+    logsembed.set_thumbnail(url="https://cdn.discordapp.com/attachments/1365048856706023517/1454186679060660387/d1631a367e7b13cb22c78a416a5ad5be.jpg?ex=69502c61&is=694edae1&hm=4e908a9198ed0cd6477ceffa54ebabbf08f579b767d37ea516b126092ac3ecec&")
+    logsembed.add_field(name="", value=f"Setup was triggered by {interaction.user.mention}")
+
+    await keologs.send(embed=logsembed)
 
 Token = os.getenv("Token")
 bot.run(Token)
