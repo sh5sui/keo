@@ -181,6 +181,27 @@ async def ticket(interaction: discord.Interaction, reason: str = None):
 
     await keologs.send(embed=logsembed)
 
+@bot.tree.command(name="giverole", description="Gives a role to everyone in the server")
+async def giverole(interaction: discord.Interaction, role: discord.Role = None):
+
+    if not(interaction.user.guild_permissions.administrator):
+        interaction.response.send_message("You don't have permission to use this command", ephemeral=True)
+        return
+    
+    await interaction.response.defer(ephemeral=True)
+    
+    count = 0
+    for member in interaction.guild.members:
+        if role not in member.roles:
+            try:
+                await member.add_roles(role, reason=f"Role mass added by {interaction.user}")
+                count +=1
+                await asyncio.sleep(0.8)
+            except Exception as e:
+                print(f"Failed to give role to {member}")
+
+            await interaction.followup.send(f"Added {role} to {count} members")
+
 @bot.tree.command(name="add", description="Adds a member to a ticket")
 async def add(interaction: discord.Interaction, member: discord.Member = None):
 
