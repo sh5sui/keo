@@ -90,6 +90,58 @@ async def warn(interaction: discord.Interaction, member: discord.Member = None, 
 
     await interaction.response.send_message(f"{member.mention} Has been warned for reason {reason}")
 
+@bot.tree.command(name="viewwarns", description="Views the warns of a certain user")
+async def viewwarns(interaction: discord.Interaction, userid: str = None):
+
+    if not(interaction.user.guild_permissions.manage_messages):
+        await interaction.response.send_message("You don't have permission to run this command", ephemeral=True)
+        return
+    
+    if userid is None:
+        await interaction.response.send_message("You must enter a userid", ephemeral=True)
+        return
+    
+    async with bot.db.execute(
+        "SELECT id, reason, warned_by FROM warnings WHERE guild_id = ? AND user_id = ?",
+        (interaction.guild.id, userid)
+    ) as cursor:
+        rows = await cursor.fetchall()
+
+    if not rows:
+        await interaction.response.send_message(f"No warnings found for <@{userid}>")
+
+    embed = discord.Embed(title="Warnings", color=discord.Color.red())
+    embed.set_thumbnail(url=interaction.guild.icon.url)
+
+    for row in rows:
+        warn_id, reason, warned_by_id = row
+        warned_by = interaction.guild.get_member(warned_by_id)
+        warned_by_name = warned_by.name if warned_by else f"{warned_by_id}"
+        embed.add_field(name=f"Warn id", value=warn_id, inline=False)
+        embed.add_field(name=f"Reason", value=reason, inline=False)
+        embed.add_field(name="Warned by", value=warned_by_name, inline=False)
+
+    await interaction.response.send_message(embed=embed)
+
+@bot.tree.command(name="removewarn", description="Removes a warn from a person")
+async def removewarn(interaction: discord.Interaction, warnid: str = None):
+
+    if not(interaction.user.guild_permissions.manage_messages):
+        await interaction.response.send_message("You don't have permission to run this command", ephemeral=True)
+        return
+    
+    if warnid is None:
+        await interaction.response.send_message("You must enter a valid warnid", ephemeral=True)
+        return
+    
+    await bot.db.execute(
+        "DELETE FROM warnings WHERE guild_id = ? AND id = ?",
+        (interaction.guild.id, warnid)
+    )
+    await bot.db.commit()
+
+    await interaction.response.send_message("Warn was removed successfully")
+
 @bot.tree.command(name="ticket", description="Open a ticket with a specified reason")
 async def ticket(interaction: discord.Interaction, reason: str = None):
 
