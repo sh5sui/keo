@@ -46,7 +46,7 @@ async def on_ready():
 @bot.event
 async def on_member_join(member):
 
-    keowelcome = discord.utils.get(member.guild.text_channels, name="keo-logs")
+    keowelcome = discord.utils.get(member.guild.text_channels, name="-")
 
     if keowelcome is None:
         return
