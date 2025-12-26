@@ -37,6 +37,11 @@ async def ticket(interaction: discord.Interaction, reason: str = None):
 
     guild = interaction.guild
 
+    permissions = {
+    guild.default_role: discord.PermissionOverwrite(view_channel=False),
+    interaction.user: discord.PermissionOverwrite(view_channel=True, send_messages=True)
+    }
+
     embed = discord.Embed(title="Ticket", color=discord.Color.blue())
     embed.set_thumbnail(url=guild.icon.url)
     embed.add_field(name="", value="Please wait for a member of staff to respond to your ticket. While your waiting, feel free to describe your issue in more detail.")
@@ -45,7 +50,8 @@ async def ticket(interaction: discord.Interaction, reason: str = None):
 
     ticket = await guild.create_text_channel(
         name=f"ticket-{reason}",
-        category=category
+        category=category,
+        overwrites=permissions
     )
 
     await ticket.send(
@@ -54,6 +60,30 @@ async def ticket(interaction: discord.Interaction, reason: str = None):
     )
 
     await interaction.response.send_message(f"Your ticket has been created, {ticket.mention}", ephemeral=True)
+
+@bot.tree.command(name="close", description="Closes an open ticket")
+async def close(interaction: discord.Interaction, reason: str = None):
+
+    guild = interaction.guild
+
+    if not (interaction.user.guild_permissions.manage_channels):
+        await interaction.response.send_message("You do not have permission to run this command", ephemeral=True)
+        return
+    
+    if interaction.channel.category is None or interaction.channel.category.name != "tickets":
+        await interaction.response.send_message("You cannot use this command outside of the tickets category", ephemeral=True)
+        return
+    
+    await interaction.response.send_message(f"This ticket will be deleted in 3 seconds for reason: {reason}")
+
+    await asyncio.sleep(3)
+    
+    await interaction.channel.delete()
+
+@bot.tree.command(name="setup", description="Runs you through a setup to ensure that keo runs as intended in your server")
+async def setup(interaction: discord.Interaction, reason: str = None):
+
+    interaction.response.send_message("Command is still in development")
 
 Token = os.getenv("Token")
 bot.run(Token)
