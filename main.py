@@ -25,8 +25,22 @@ async def on_ready():
             name="Watching tickets for shitheads"
         )
     )
+
     print(f'{bot.user} online')
+
     bot.db = await aiosqlite.connect('keo.db')
+
+    await bot.db.execute("""
+        CREATE TABLE IF NOT EXISTS warnings (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            guild_id INTEGER NOT NULL,
+            user_id INTEGER NOT NULL,
+            warned_by INTEGER NOT NULL,
+            reason TEXT
+        )
+    """)
+    await bot.db.commit()
+
     await bot.tree.sync()
 
 @bot.event
@@ -52,6 +66,29 @@ async def invite(interaction: discord.Interaction):
 async def license(interaction: discord.Interaction):
 
     await interaction.response.send_message("Keo is available for modification BUT copy's of keo's code modified by users must NOT be distributed, sold, or for public use without the written consent of it's direct owner. If you violate any of these statues you may be subject to legal action being taken against you for copyright infringments. You can read more at https://github.com/sh5sui/keo/blob/main/LICENSE/")
+
+@bot.tree.command(name="warn", description="Warns a user for a reason")
+async def warn(interaction: discord.Interaction, member: discord.Member = None, reason: str = None):
+
+    if not(interaction.user.guild_permissions.manage_messages):
+        await interaction.response.send_message("You don't have permission to use this command", ephemeral=True)
+        return
+    
+    if interaction.user == member:
+        await interaction.response.send_message("You cannot warn yourself", ephemeral=True)
+        return
+    
+    if member is None or reason is None:
+        await interaction.response.send_message("You must provide a member to warn and a reason", ephemeral=True)
+        return
+    
+    await bot.db.execute(
+        "INSERT INTO warnings (guild_id, user_id, warned_by, reason) VALUES (?, ?, ?, ?)",
+        (interaction.guild.id, member.id, interaction.user.id, reason)
+    )
+    await bot.db.commit()
+
+    await interaction.response.send_message(f"{member.mention} Has been warned for reason {reason}")
 
 @bot.tree.command(name="ticket", description="Open a ticket with a specified reason")
 async def ticket(interaction: discord.Interaction, reason: str = None):
