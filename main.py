@@ -83,6 +83,10 @@ async def close(interaction: discord.Interaction, reason: str = None):
 @bot.tree.command(name="setup", description="Runs you through a setup to ensure that keo runs as intended in your server")
 async def setup(interaction: discord.Interaction, reason: str = None):
 
+    setupstart=discord.Embed(name="Setup process", color=discord.Color.blue())
+    setupstart.set_thumbnail(url=interaction.guild.icon.url)
+    setupstart.add_field(name="Welcome", value="Welcome to the setup process for the keo bot. This will be a fully clear and guided process that will take less than 3 minutes to complete. This setup process is to make sure that the keo bot works perfectly inside of your server and so that there is no errors when running commands or anything.")
+
     interaction.response.send_message("Command is still in development")
 
 Token = os.getenv("Token")
