@@ -5,12 +5,9 @@ import asyncio
 from discord import app_commands
 from dotenv import load_dotenv
 import os
-import sqlite3
+import aiosqlite
 
 load_dotenv()
-
-conn = sqlite3.connect('keo.db')
-cursor = conn.cursor()
 
 intents = discord.Intents.default()
 intents.typing = False
@@ -29,6 +26,7 @@ async def on_ready():
         )
     )
     print(f'{bot.user} online')
+    bot.db = await aiosqlite.connect('keo.db')
     await bot.tree.sync()
 
 @bot.event
