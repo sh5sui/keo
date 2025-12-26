@@ -6,8 +6,20 @@ from discord import app_commands
 from discord import guild
 from dotenv import load_dotenv
 import os
+import sqlite3
 
 load_dotenv()
+
+conn = sqlite3.connect('keo.db')
+cursor = conn.cursor()
+
+cursor.execute('''
+CREATE TABLE IF NOT EXSITS users (
+    id INTEGER PRIMARY KEY,
+    username TEXT NOT NULL,
+    score INTEGER
+)
+''')
 
 intents = discord.Intents.default()
 intents.typing = False
