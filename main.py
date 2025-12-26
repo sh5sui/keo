@@ -19,6 +19,10 @@ bot = commands.Bot(command_prefix=";", intents=intents)
 
 @bot.event
 async def on_ready():
+    discord.Activity(
+        type=discord.ActivityType.watching,
+        name="tickets for shitheads"
+    )
     print(f'{bot.user} online')
     await bot.tree.sync()
 
