@@ -13,14 +13,6 @@ load_dotenv()
 conn = sqlite3.connect('keo.db')
 cursor = conn.cursor()
 
-cursor.execute('''
-CREATE TABLE IF NOT EXSITS users (
-    id INTEGER PRIMARY KEY,
-    username TEXT NOT NULL,
-    score INTEGER
-)
-''')
-
 intents = discord.Intents.default()
 intents.typing = False
 intents.message_content = True
@@ -78,6 +70,19 @@ async def ticket(interaction: discord.Interaction, reason: str = None):
     )
 
     await interaction.response.send_message(f"Your ticket has been created, {ticket.mention}", ephemeral=True)
+
+@bot.tree.command(name="commands", description="Shows a list of all available commands")
+async def commands(interaction: discord.Interaction):
+
+    embed=discord.Embed(title="Keo commands", color=discord.Color.blue())
+    embed.set_thumbnail(url=interaction.guild.icon.url)
+    embed.add_field(name="invite", value="Gives the invite for keo", inline=False)
+    embed.add_field(name="license", value="Shows the license for keo", inline=False)
+    embed.add_field(name="ticket", value="Opens a ticket with reason", inline=False)
+    embed.add_field(name="close", value="Closes an open ticket with reason", inline=False)
+    embed.add_field(name="setup", value="Automatically sets your server up to be in full compatability with keo", inline=False)
+
+    await interaction.response.send_message(embed=embed)
 
 @bot.tree.command(name="close", description="Closes an open ticket")
 async def close(interaction: discord.Interaction, reason: str = None):
