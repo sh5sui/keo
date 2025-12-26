@@ -89,12 +89,12 @@ async def commands(interaction: discord.Interaction):
 @bot.tree.command(name="ping", description="Pings the bot to see latency")
 async def ping(interaction: discord.Interaction):
 
-    interaction.response.send_message(f"Latency: {bot.latency}")
+    await interaction.response.send_message(f"Latency: {bot.latency}ms")
 
 @bot.tree.command(name="avatar", description="Get a users avatar")
 async def avatar(interaction: discord.Interaction, target: discord.User = None):
 
-    interaction.response.send_message(target.avatar.url)
+    await interaction.response.send_message(target.avatar.url)
 
 @bot.tree.command(name="close", description="Closes an open ticket")
 async def close(interaction: discord.Interaction, reason: str = None):
