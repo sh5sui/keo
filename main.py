@@ -46,16 +46,16 @@ async def on_ready():
 @bot.event
 async def on_member_join(member):
 
-    channel = member.guild.system_channel
+    keowelcome = discord.utils.get(member.guild.text_channels, name="keo-logs")
 
-    if channel is None:
+    if keowelcome is None:
         return
 
     embed = discord.Embed(title="Welcome", color=discord.Color.blue())
     embed.set_thumbnail(url=member.avatar.url)
     embed.add_field(name="", value=f"Welcome to {member.guild.name}, {member.mention}")
 
-    await channel.send(embed=embed)
+    await keowelcome.send(embed=embed)
 
 @bot.tree.command(name="invite", description="Get keo's invite link")
 async def invite(interaction: discord.Interaction):
@@ -287,6 +287,10 @@ async def setup(interaction: discord.Interaction):
         interaction.guild.default_role: discord.PermissionOverwrite(view_channel=False)
     }
 
+    onboardingpermissions = {
+        interaction.guild.default_role: discord.PermissionOverwrite(send_messages=False)
+    }
+
     guild = interaction.guild
 
     logs = discord.utils.get(guild.text_channels, name="keo-logs")
@@ -311,6 +315,11 @@ async def setup(interaction: discord.Interaction):
     logsetup = await interaction.guild.create_text_channel(
         name="keo-logs",
         overwrites=logpermissions
+    )
+
+    onboardingsetup = await interaction.guild.create_text_channel(
+        name="-",
+        overwrites=onboardingpermissions
     )
 
     interaction.followup.send(f"Setup finished, Created tickets category, created keo logs channel {logsetup.mention}")
