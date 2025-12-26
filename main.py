@@ -22,7 +22,7 @@ async def on_ready():
     await bot.change_presence(
         activity=discord.Activity(
             type=discord.ActivityType.watching,
-            name="tickets for shitheads"
+            name="Watching tickets for shitheads"
         )
     )
     print(f'{bot.user} online')
