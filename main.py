@@ -136,6 +136,10 @@ async def setup(interaction: discord.Interaction):
         interaction.guild.default_role: discord.PermissionOverwrite(view_channel=False)
     }
 
+    logpermissions = {
+        interaction.guild.default_role: discord.PermissionOverwrite(view_channel=False)
+    }
+
     if not (interaction.user.guild_permissions.administrator):
         await interaction.response.send_message("You don't have permission to run this command. Missing permssion: Administrator")
         return
@@ -148,9 +152,14 @@ async def setup(interaction: discord.Interaction):
 
     await interaction.response.send_message("Starting setup")
 
-    setup = await interaction.guild.create_category(
+    ticketsetup = await interaction.guild.create_category(
         name="tickets",
         overwrites=ticketspermissions
+    )
+
+    logsetup = await interaction.guild.create_text_channel(
+        name="keo-logs",
+        overwrites=logpermissions
     )
 
     await interaction.response.send_message("Setup completed")
