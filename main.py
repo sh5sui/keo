@@ -32,6 +32,20 @@ async def on_ready():
     print(f'{bot.user} online')
     await bot.tree.sync()
 
+@bot.event
+async def on_member_join(member):
+
+    channel = member.guild.system_channel
+
+    if channel is None:
+        return
+
+    embed = discord.Embed(title="Welcome", color=discord.Color.blue())
+    embed.set_thumbnail(url=member.avatar.url)
+    embed.add_field(name="", value=f"Welcome to {member.guild.name}, {member.mention}")
+
+    await channel.send(embed=embed)
+
 @bot.tree.command(name="invite", description="Get keo's invite link")
 async def invite(interaction: discord.Interaction):
 
