@@ -81,13 +81,30 @@ async def close(interaction: discord.Interaction, reason: str = None):
     await interaction.channel.delete()
 
 @bot.tree.command(name="setup", description="Runs you through a setup to ensure that keo runs as intended in your server")
-async def setup(interaction: discord.Interaction, reason: str = None):
+async def setup(interaction: discord.Interaction):
 
-    setupstart=discord.Embed(name="Setup process", color=discord.Color.blue())
+    ticketspermissions = {
+        interaction.guild.default_role: discord.PermissionOverwrite(view_channel=False)
+    }
+
+    if not (interaction.user.guild_permissions.administrator):
+        await interaction.response.send_message("You don't have permission to run this command. Missing permssion: Administrator")
+        return
+
+    setupstart=discord.Embed(title="Setup process", color=discord.Color.blue())
     setupstart.set_thumbnail(url=interaction.guild.icon.url)
-    setupstart.add_field(name="Welcome", value="Welcome to the setup process for the keo bot. This will be a fully clear and guided process that will take less than 3 minutes to complete. This setup process is to make sure that the keo bot works perfectly inside of your server and so that there is no errors when running commands or anything.")
+    setupstart.add_field(name="", value="Welcome to the keto bot setup process. This process is automated and any changes that should be made for this bot to work properly in your server will be completed automatically. Any changes we need to do that are already done by you will be skipped.")
 
-    interaction.response.send_message("Command is still in development")
+    await interaction.response.send_message(embed=setupstart)
+
+    await interaction.response.send_message("Starting setup")
+
+    setup = await interaction.guild.create_category(
+        name="tickets",
+        overwrites=ticketspermissions
+    )
+
+    await interaction.response.send_message("Setup completed")
 
 Token = os.getenv("Token")
 bot.run(Token)
