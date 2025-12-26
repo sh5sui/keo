@@ -52,7 +52,7 @@ async def on_member_join(member):
         return
 
     embed = discord.Embed(title="Welcome", color=discord.Color.blue())
-    embed.set_thumbnail(url=member.avatar.url)
+    embed.set_thumbnail(url=member.display_avatar.url)
     embed.add_field(name="", value=f"Welcome to {member.guild.name}, {member.mention}")
 
     await keowelcome.send(embed=embed)
