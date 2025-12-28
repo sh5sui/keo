@@ -124,19 +124,53 @@ async def viewwarns(interaction: discord.Interaction, userid: str = None):
     await interaction.response.send_message(embed=embed)
 
 @bot.tree.command(name="ban", description="Bans a user")
-async def ban(interaction: discord.Interaction, target: discord.User = None):
+async def ban(interaction: discord.Interaction, target: discord.User = None, reason: str = None):
+
+    guild = interaction.guild
 
     if target == interaction.user:
         await interaction.response.send_message("You cannot ban yourself", ephemeral=True)
         return
     
     if not(interaction.user.guild_permissions.ban_members):
-        await interaction.response.send_message("You don't have permission to use this command")
+        await interaction.response.send_message("You don't have permission to use this command", ephemeral=True)
         return
     
-    if target.top_role < interaction.user.top_role:
-        interaction.response.send_message("You cannot ban someone with a higher role than you")
+    if target.top_role > interaction.user.top_role:
+        await interaction.response.send_message("You cannot ban someone with a higher role than you", ephemeral=True)
         return
+    
+    await guild.ban(target, reason=f"Banned by {interaction.user} for reason: {reason}")
+    await interaction.response.send_message(f"{target.mention} was banned for reason: {reason}")
+
+@bot.tree.command(name="kick", description="Kicks a user")
+async def kick(interaction: discord.Interaction, target: discord.User = None, reason: str = None):
+
+    guild = interaction.guild
+
+    if target == interaction.user:
+        await interaction.response.send_message("You cannot kick yourself", ephemeral=True)
+        return
+    
+    if not(interaction.user.guild_permissions.kick_members):
+        await interaction.response.send_message("You don't have permission to use this command", ephemeral=True)
+        return
+    
+    if target.top_role > interaction.user.top_role:
+        await interaction.response.send_message("You cannot kick someone with a higher role than you", ephemeral=True)
+        return
+    
+    await guild.kick(target, reason=f"Kicked by {interaction.user} for reason: {reason}")
+    await interaction.response.send_message(f"{target.mention} was kicked for reason: {reason}")
+
+@bot.tree.command(name="globalban", description="Globally bans someone from every server that the bot is in")
+async def globalban(interaction: discord.Interaction, target: str = None):
+
+    if interaction.user.id != 61082520899182336:
+        await interaction.response.send_message("This command is meant to only be for the bot owners use. This bot applys a ban to every single server that the bot is in for a specific user. This will only be used for very serious offenses. If you want to ask for a person to be added to the global ban system you can open a ticket in the support server.", ephemeral=True)
+        return
+    
+    await interaction.response.send_message("Command is still in development", ephemeral=True)
 
 @bot.tree.command(name="removewarn", description="Removes a warn from a person")
 async def removewarn(interaction: discord.Interaction, warnid: str = None):
@@ -156,6 +190,66 @@ async def removewarn(interaction: discord.Interaction, warnid: str = None):
     await bot.db.commit()
 
     await interaction.response.send_message("Warn was removed successfully")
+
+@bot.tree.command(name="userinfo", description="Shows information about a user")
+async def userinfo(interaction: discord.Interaction, target: discord.Member = None):
+
+    embed = discord.Embed(title="User info", color=discord.Color.blue())
+    embed.set_thumbnail(url=target.avatar.url)
+    embed.add_field(name="Username", value=target.mention)
+    embed.add_field(name="Account age", value=target.created_at)
+    embed.add_field(name="Status", value=target.client_status)
+
+@bot.tree.command(name="serverinfo", description="Shows information about the server")
+async def serverinfo(interaction: discord.Interaction):
+
+    embed = discord.Embed(title="Server info", color=discord.Color.blue())
+    embed.set_thumbnail(url=interaction.guild.icon.url)
+    embed.add_field(name="Server Id", value=interaction.guild_id, inline=False)
+    embed.add_field(name="Owner", value=interaction.guild.owner.mention, inline=False)
+    embed.add_field(name="Member Count", value=interaction.guild.member_count, inline=False)
+    embed.add_field(name="Created On", value=interaction.guild.created_at, inline=False)
+    embed.add_field(name="Roles", value=len(interaction.guild.roles), inline=False)
+
+    await interaction.response.send_message(embed=embed)
+
+@bot.tree.command(name="mute", description="Timeout a user with reason")
+async def mute(interaction: discord.Interaction, target: discord.User = None, reason: str = None, length: int = None):
+
+    guild = interaction.guild
+    mutedrole = interaction.guild.get_role("muted")
+
+    if not(interaction.user.guild_permissions.mute_members):
+        await interaction.response.send_message("You don't have permission to use this command", ephemeral=True)
+        return
+    
+    if target == interaction.user:
+        await interaction.response.send_message("You cannot mute yourself", ephemeral=True)
+        return
+    
+    if target.top_role > interaction.user.top_role:
+        await interaction.response.send_message("You cannot mute someone with a higher role than you", ephemeral=True)
+        return
+    
+    await target.add_roles(mutedrole)
+    await interaction.response.send_message(f"{target.mention} has been muted for {length}s for reason {reason}")
+
+    asyncio.sleep(length)
+
+    await target.remove_roles(mutedrole)
+    await interaction.followup.send(f"{target.mention} has been muted for reason timeout expired")
+
+@bot.tree.command(name="unmute", description="Removes a mute from a person")
+async def unmute(interaction: discord.Interaction, target: discord.Member = None):
+
+    mutedrole = interaction.guild.get_role("muted")
+
+    if not(interaction.user.guild_permissions.mute_members):
+        await interaction.response.send_message("You don't have permission to use this command", ephemeral=True)
+        return
+    
+    await target.remove_roles(mutedrole)
+    await interaction.response.send_message(f"{target.mention} has been unmuted by {interaction.user.mention}")
 
 @bot.tree.command(name="ticket", description="Open a ticket with a specified reason")
 async def ticket(interaction: discord.Interaction, reason: str = None):
@@ -294,6 +388,8 @@ async def close(interaction: discord.Interaction, reason: str = None):
 @bot.tree.command(name="setup", description="Runs you through a setup to ensure that keo runs as intended in your server")
 async def setup(interaction: discord.Interaction):
 
+    muted = interaction.guild.get_role("muted")
+
     ticketspermissions = {
         interaction.guild.default_role: discord.PermissionOverwrite(view_channel=False)
     }
@@ -304,6 +400,10 @@ async def setup(interaction: discord.Interaction):
 
     onboardingpermissions = {
         interaction.guild.default_role: discord.PermissionOverwrite(send_messages=False)
+    }
+
+    mutedrolepermissions = {
+        muted: discord.PermissionOverwrite(send_messages=False)
     }
 
     guild = interaction.guild
@@ -335,6 +435,11 @@ async def setup(interaction: discord.Interaction):
     onboardingsetup = await interaction.guild.create_text_channel(
         name="-",
         overwrites=onboardingpermissions
+    )
+
+    mutedrolesetup = await interaction.guild.create_role(
+        name="muted",
+        permissions=mutedrolepermissions
     )
 
     interaction.followup.send(f"Setup finished, Created tickets category, created keo logs channel {logsetup.mention}")
