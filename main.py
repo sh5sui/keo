@@ -123,6 +123,21 @@ async def viewwarns(interaction: discord.Interaction, userid: str = None):
 
     await interaction.response.send_message(embed=embed)
 
+@bot.tree.command(name="ban", description="Bans a user")
+async def ban(interaction: discord.Interaction, target: discord.User = None):
+
+    if target == interaction.user:
+        await interaction.response.send_message("You cannot ban yourself", ephemeral=True)
+        return
+    
+    if not(interaction.user.guild_permissions.ban_members):
+        await interaction.response.send_message("You don't have permission to use this command")
+        return
+    
+    if target.top_role < interaction.user.top_role:
+        interaction.response.send_message("You cannot ban someone with a higher role than you")
+        return
+
 @bot.tree.command(name="removewarn", description="Removes a warn from a person")
 async def removewarn(interaction: discord.Interaction, warnid: str = None):
 
