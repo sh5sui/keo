@@ -166,7 +166,7 @@ async def kick(interaction: discord.Interaction, target: discord.User = None, re
 @bot.tree.command(name="globalban", description="Globally bans someone from every server that the bot is in")
 async def globalban(interaction: discord.Interaction, target: str = None):
 
-    if interaction.user.id != 61082520899182336:
+    if interaction.user.id != 610825208999182336:
         await interaction.response.send_message("This command is meant to only be for the bot owners use. This bot applys a ban to every single server that the bot is in for a specific user. This will only be used for very serious offenses. If you want to ask for a person to be added to the global ban system you can open a ticket in the support server.", ephemeral=True)
         return
     
@@ -212,6 +212,15 @@ async def serverinfo(interaction: discord.Interaction):
     embed.add_field(name="Roles", value=len(interaction.guild.roles), inline=False)
 
     await interaction.response.send_message(embed=embed)
+
+@bot.tree.command(name="activate", description="Activate the usage of the bot for a certain guild")
+async def activate(interaction: discord.Interaction, guildid: str = None):
+
+    if interaction.user.id != 610825208999182336:
+        await interaction.response.send_message("You don't have permission to use this command")
+        return
+    
+    await interaction.response.send_message("Currently under development")
 
 @bot.tree.command(name="mute", description="Timeout a user with reason")
 async def mute(interaction: discord.Interaction, target: discord.User = None, reason: str = None, length: int = None):
