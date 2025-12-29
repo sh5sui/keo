@@ -51,9 +51,9 @@ async def on_member_join(member):
     if keowelcome is None:
         return
 
-    embed = discord.Embed(title="Welcome", color=discord.Color.blue())
+    embed = discord.Embed(title=member, color=discord.Color.green())
     embed.set_thumbnail(url=member.display_avatar.url)
-    embed.add_field(name="", value=f"Welcome to {member.guild.name}, {member.mention}")
+    embed.add_field(name="", value=f"{member.mention} just joined {member.guild.name}, they are now at {member.guild.member_count}", inline=False)
 
     await keowelcome.send(embed=embed)
 
