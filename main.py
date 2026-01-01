@@ -6,6 +6,7 @@ from discord import app_commands
 from dotenv import load_dotenv
 import os
 import aiosqlite
+from openai import OpenAi
 
 load_dotenv()
 
@@ -89,6 +90,21 @@ async def warn(interaction: discord.Interaction, member: discord.Member = None, 
     await bot.db.commit()
 
     await interaction.response.send_message(f"{member.mention} Has been warned for reason {reason}")
+
+@bot.tree.command(name="askai", description="Ask ChatGPT Anything")
+async def askai(interaction: discord.Interaction, prompt: str = None):
+
+    client = OpenAi(
+        api_key=os.getenv("OpenAI"),
+    )
+
+    response = client.resposes.create(
+        model="gpt-4o",
+        instructions="Limit to one sentence, briefly explain the topic to the best of your ability.",
+        input=prompt
+    )
+
+    interaction.response.send_message(response)
 
 @bot.tree.command(name="viewwarns", description="Views the warns of a certain user")
 async def viewwarns(interaction: discord.Interaction, userid: str = None):
