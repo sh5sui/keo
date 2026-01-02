@@ -48,6 +48,9 @@ async def on_ready():
 async def on_member_join(member):
 
     keowelcome = discord.utils.get(member.guild.text_channels, name="-")
+    comrole = member.guild.get_role("community")
+
+    member.add_roles(comrole)
 
     if keowelcome is None:
         return
@@ -450,6 +453,10 @@ async def setup(interaction: discord.Interaction):
     ticketsetup = await interaction.guild.create_category(
         name="tickets",
         overwrites=ticketspermissions
+    )
+
+    communityrole = await interaction.guild.create_role(
+        name="community"
     )
 
     logsetup = await interaction.guild.create_text_channel(
